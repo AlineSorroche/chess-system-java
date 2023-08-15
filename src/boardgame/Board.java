@@ -36,4 +36,9 @@ public class Board {
 		return pieces[position.getRow()][position.getColumn()];
 	}
 	
+	public void placePiece(Piece piece, Position position) {//essa matriz de peças foi declarada no meu tabuleiro e instanciada no construtor
+		pieces[position.getRow()][position.getColumn()] = piece;//pego a matriz na posição dada e atribuo a ela a posição que informei
+	    piece.position = position;//informo que a position não é mais nula e sim recebe a posição. como eu estou no mesmo pacote da classe consigo acessar a position
+	}
+	
 }
