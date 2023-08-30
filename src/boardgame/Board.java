@@ -48,6 +48,19 @@ public class Board {
 	    piece.position = position;//informo que a position não é mais nula e sim recebe a posição. como eu estou no mesmo pacote da classe consigo acessar a position
 	}
 	
+	public Piece removePiece(Position position) { //remover uma peça de uma dada posição do tabuleiro
+		if (!positionExists(position)) {
+			throw new BoardException("Position not on the board");
+		}
+		if (piece(position) == null) {//se a peça do tabuleiro nessa posição é igual a nulo, se for verdade quer dizer que não tem nenhuma peça nessa posição
+			return null;
+		}//retirar a peça do tabuleiro
+		Piece aux = piece(position);//variável vai receber a peça que tiver no tabuleiro nessa posição
+		aux.position = null;//essa peça foi retirada do tabuleiro e não tem mais
+		pieces[position.getRow()][position.getColumn()] = null;//acesso a matriz de peças piece e digo que na posição onde estou removendo a peça agora vai ser nulo
+		return aux;//retorna a variável que contém a peça que foi retirada
+	}
+	
 	private boolean positionExists(int row, int column) { //dentro da classe vai ter uma hora que vai ser mais fácil testar pela linha e coluna do que pela posição
 		return row >= 0 && row < rows && column >= 0 && column < columns;//a linha tem que ser maior ou igual a zero e menor do que a altura do tabuleiro e também a coluna. Valida a posição
 	}
