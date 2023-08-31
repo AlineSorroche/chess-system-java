@@ -41,8 +41,11 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	}
 	
 	private void validateSourcePosition(Position position) {
-		if (!board.thereIsAPiece(position)) {//se não existir essa posição
+		if (!board.thereIsAPiece(position)) {//se não existir peça nessa posição de origem
 			throw new ChessException("There is no piece on source position");
+		}
+		if(!board.piece(position).isThereAnyPossibleMove()) {//se não existir movimentos possíveis para essa peça
+			throw new ChessException("There is no possible moves for the chosen piece");
 		}
 	}
 	//instanciar as peças do xadrez informando as coordenadas do xadrez e não no sistema da matriz que fica confuso
