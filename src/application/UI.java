@@ -69,7 +69,7 @@ public class UI {
 		}
 		System.out.println("  a b c d e f g h");
 	}
-	private static void printPiece(ChessPiece piece, boolean background) {
+	private static void printPiece(ChessPiece piece, boolean background) {//criamos a sobrecarga do método printPiece
     	if (background) {
     		System.out.print(ANSI_BLUE_BACKGROUND);
     	}
