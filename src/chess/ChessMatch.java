@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import boardgame.Board;
 import boardgame.Piece;
@@ -14,6 +15,7 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	private int turn;
 	private Color currentPlayer;
 	private Board board;
+	private boolean check;
 	
 	private List<Piece> piecesOnTheBoard = new ArrayList<>();
 	private List<Piece> capturedPieces = new ArrayList<>();
@@ -23,6 +25,7 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 		board = new Board(8, 8);
 		turn = 1;
 		currentPlayer = Color.WHITE;
+		check = false; //uma propriedade boolean já começa por padrão com falso porém posso inicializar no construtor
 		initialSetup();
 	}
 	
@@ -32,6 +35,10 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	
 	public Color getCurrentPlayer() {
 		return currentPlayer;
+	}
+	
+	public boolean getCheck() {
+		return check;
 	}
 	
 	
@@ -57,6 +64,14 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	    validateSourcePosition(source); //uma operação que vai validar se existia uma peça nessa posição de origem
 	    validateTargetPosition(source,target);//uma operação que vai validar a posição de destino
 	    Piece capturedPiece = makeMove(source, target); //operação responsável pelo movimento da peça
+	    
+	    //testar se me pus em xeque
+	    if (testCheck(currentPlayer)) {
+	    	undoMove(source, target, capturedPiece);
+	    	throw new ChessException("You can't put yourself in check");
+	    }
+	    
+	    check = (testCheck(opponent(currentPlayer))) ? true : false;
 	    nextTurn();
 	    return (ChessPiece)capturedPiece;//retorna a peça capturada, downcast para ChessPiece porque essa peça capturada era do tipo Piece
 	}
@@ -73,6 +88,17 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 		}
 		
 		return capturedPiece;
+	}
+	
+	private void undoMove(Position source, Position target, Piece capturedPiece) {//desfazer a jogada
+		Piece p = board.removePiece(target);
+		board.placePiece(p, source);
+		
+		if(capturedPiece != null) {
+			board.placePiece(capturedPiece, target);
+			capturedPieces.remove(capturedPiece);
+			piecesOnTheBoard.add(capturedPiece);
+		}
 	}
 	
 	private void validateSourcePosition(Position position) {
@@ -98,6 +124,31 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;//expressão condicional ternária: se o jogador atual for igual a color.white, agora ele vai ser color.black, caso contrário ele vai ser o color.white -- troca de turno
 	}
 	
+	private Color opponent(Color color) {
+		return (color == Color.WHITE) ? Color.BLACK : Color.WHITE;//se color for white retorna black, caso contrário retorna white
+	}
+	
+	private ChessPiece king(Color color) {//procurar na lista de peças em jogo qual que é o rei desta cor
+		List<Piece> list = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == color).collect(Collectors.toList());//lambda para filtrar uma lista
+		for (Piece p : list) {
+			if (p instanceof King) {
+				return (ChessPiece)p;
+			}
+		}
+		throw new IllegalStateException("There is no " + color + "King on the board");
+	}
+	
+	private boolean testCheck(Color color) { //vou testar se o rei dessa cor está em xeque
+		Position kingPosition = king(color).getChessPosition().toPosition();
+		List<Piece> opponentPieces = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == opponent(color)).collect(Collectors.toList());
+		for (Piece p : opponentPieces) {//testar pra cada peça p na lista de peças do oponente vou testar se tem algum movimento possível que leva para peça p
+			boolean [][] mat = p.possibleMoves();
+			if (mat[kingPosition.getRow()][kingPosition.getColumn()]) {//se esse elemento for verdadeiro...
+				return true;//quer dizer que o rei está em xeque
+			}
+		}//se eu esgotar todas as peças adversárias e não houver nenhuma peça retorno o falso
+		return false;
+	}	
 	//instanciar as peças do xadrez informando as coordenadas do xadrez e não no sistema da matriz que fica confuso
 	private void placeNewPiece(char column, int row, ChessPiece piece) {//método vai receber as coordenadas do xadrez
 		board.placePiece(piece, new ChessPosition(column, row).toPosition());
