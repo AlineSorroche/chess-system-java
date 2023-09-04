@@ -47,7 +47,7 @@ public class Pawn extends ChessPiece {
 			}
 			//verificando as duas posições acima (caso seja primeira jogada)
 			p.setValues(position.getRow() +2, position.getColumn());//uma posição acima
-			Position p2 = new Position(position.getRow() +1, position.getColumn());//para poder testar se na posição acima tem alguém
+			Position p2 = new Position(position.getRow() + 1, position.getColumn());//para poder testar se na posição acima tem alguém
 			if (getBoard().positionExists(p) && !getBoard().thereIsAPiece(p) && getBoard().positionExists(p2) && !getBoard().thereIsAPiece(p2) && getMoveCount() == 0) {//se a posição existe e não tem uma peça naquela posição, testo junto se é a primeira rodada, pois nessa jogada o peão pode mover duas casas
 				mat[p.getRow()][p.getColumn()] = true;
 			}
