@@ -25,6 +25,12 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
        return mat;
 	}
 	
+	public boolean[][] possibleMoves(ChessPosition sourcePosition) {//retornar as posições possíveis
+		Position position = sourcePosition.toPosition();
+		validateSourcePosition(position);
+		return board.piece(position).possibleMoves();
+	}
+	
 	public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) { //método recebe posição de origem e de destino
 	    Position source = sourcePosition.toPosition();
 	    Position target = targetPosition.toPosition();
