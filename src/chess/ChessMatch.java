@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import boardgame.Board;
 import boardgame.Piece;
 import boardgame.Position;
@@ -11,6 +14,10 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	private int turn;
 	private Color currentPlayer;
 	private Board board;
+	
+	private List<Piece> piecesOnTheBoard = new ArrayList<>();
+	private List<Piece> capturedPieces = new ArrayList<>();
+	
 	
 	public ChessMatch() {
 		board = new Board(8, 8);
@@ -58,6 +65,13 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 		Piece p = board.removePiece(source);//retirei a peça que estava na posição de origem
 		Piece capturedPiece = board.removePiece(target);//remover a possível peça que esteja na posição de destino
 		board.placePiece(p, target);//vou mover a peça de origem para a de destino
+		
+		if (capturedPiece != null) {
+			piecesOnTheBoard.remove(capturedPiece); // removo a peça da lista de peças no tabuleiro e...
+			capturedPieces.add(capturedPiece);//adiciono ela na lista de peças capturadas
+			
+		}
+		
 		return capturedPiece;
 	}
 	
@@ -87,6 +101,7 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	//instanciar as peças do xadrez informando as coordenadas do xadrez e não no sistema da matriz que fica confuso
 	private void placeNewPiece(char column, int row, ChessPiece piece) {//método vai receber as coordenadas do xadrez
 		board.placePiece(piece, new ChessPosition(column, row).toPosition());
+		piecesOnTheBoard.add(piece);//além de colocar a peça no tabuleiro eu já coloco essa peça na lista de peças do tabuleiro
 	}
 	
 	private void initialSetup() {
