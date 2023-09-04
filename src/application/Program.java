@@ -18,7 +18,7 @@ public class Program {
 		while (true) {
 			try {
 				UI.clearScreen(); // limpa a tela a cada vez que voltar no meu while
-				UI.printBoard(chessMatch.getPieces());//criamos a classe UI e dentro dela o método printBoard
+				UI.printMatch(chessMatch);//criamos a classe UI e dentro dela o método printBoard
 			    System.out.println();
 			    System.out.print("Source: ");
 			    ChessPosition source = UI.readChessPosition(sc);

@@ -8,12 +8,25 @@ import chess.pieces.Rook;
 
 public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabuleiro, por isso vou especificar 8,8
 	
+	private int turn;
+	private Color currentPlayer;
 	private Board board;
 	
 	public ChessMatch() {
 		board = new Board(8, 8);
+		turn = 1;
+		currentPlayer = Color.WHITE;
 		initialSetup();
 	}
+	
+	public int getTurn() {
+		return turn;
+	}
+	
+	public Color getCurrentPlayer() {
+		return currentPlayer;
+	}
+	
 	
 	public ChessPiece[][] getPieces() {// esse método vai retornar uma matriz de peças de chadrez correspondente a essa partida
        ChessPiece[][] mat = new ChessPiece[board.getRows()][board.getColumns()];
@@ -37,6 +50,7 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	    validateSourcePosition(source); //uma operação que vai validar se existia uma peça nessa posição de origem
 	    validateTargetPosition(source,target);//uma operação que vai validar a posição de destino
 	    Piece capturedPiece = makeMove(source, target); //operação responsável pelo movimento da peça
+	    nextTurn();
 	    return (ChessPiece)capturedPiece;//retorna a peça capturada, downcast para ChessPiece porque essa peça capturada era do tipo Piece
 	}
 	
@@ -51,8 +65,11 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 		if (!board.thereIsAPiece(position)) {//se não existir peça nessa posição de origem
 			throw new ChessException("There is no piece on source position");
 		}
+		if (currentPlayer != ((ChessPiece)board.piece(position)).getColor()) {//testar se o jogador atual for diferente da cor, significa que a peça é do adversário - downscast porque o getColor é uma propriedade do chessPiece só que o board.piece é de uma classe genérica a Piece
+			throw new ChessException("The chosen piece is not yours");
+		}
 		if(!board.piece(position).isThereAnyPossibleMove()) {//se não existir movimentos possíveis para essa peça
-			throw new ChessException("There is no possible moves for the chosen piece");
+		throw new ChessException("There is no possible moves for the chosen piece");
 		}
 	}
 	
@@ -61,6 +78,11 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 			throw new ChessException("The chosen piece can't move to target position");
 		}
 	}	
+	
+	private void nextTurn() {
+		turn++;
+		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;//expressão condicional ternária: se o jogador atual for igual a color.white, agora ele vai ser color.black, caso contrário ele vai ser o color.white -- troca de turno
+	}
 	
 	//instanciar as peças do xadrez informando as coordenadas do xadrez e não no sistema da matriz que fica confuso
 	private void placeNewPiece(char column, int row, ChessPiece piece) {//método vai receber as coordenadas do xadrez
