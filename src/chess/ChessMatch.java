@@ -29,6 +29,7 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	    Position source = sourcePosition.toPosition();
 	    Position target = targetPosition.toPosition();
 	    validateSourcePosition(source); //uma operação que vai validar se existia uma peça nessa posição de origem
+	    validateTargetPosition(source,target);//uma operação que vai validar a posição de destino
 	    Piece capturedPiece = makeMove(source, target); //operação responsável pelo movimento da peça
 	    return (ChessPiece)capturedPiece;//retorna a peça capturada, downcast para ChessPiece porque essa peça capturada era do tipo Piece
 	}
@@ -48,6 +49,13 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 			throw new ChessException("There is no possible moves for the chosen piece");
 		}
 	}
+	
+	private void validateTargetPosition(Position source,Position target) {
+		if (!board.piece(source).possibleMove(target)) { //se pra peça de origem a posição de destino não é um movimento possível, isso quer dizer que eu não posso mover para lá
+			throw new ChessException("The chosen piece can't move to target position");
+		}
+	}	
+	
 	//instanciar as peças do xadrez informando as coordenadas do xadrez e não no sistema da matriz que fica confuso
 	private void placeNewPiece(char column, int row, ChessPiece piece) {//método vai receber as coordenadas do xadrez
 		board.placePiece(piece, new ChessPosition(column, row).toPosition());
