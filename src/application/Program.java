@@ -18,7 +18,7 @@ public class Program {
 		ChessMatch chessMatch = new ChessMatch();
 		List<ChessPiece> captured = new ArrayList<>();
 		
-		while (true) {
+		while (!chessMatch.getCheckMate()) {//enquanto minha partida não estiver em xeque mate
 			try {
 				UI.clearScreen(); // limpa a tela a cada vez que voltar no meu while
 				UI.printMatch(chessMatch, captured);//criamos a classe UI e dentro dela o método printBoard
@@ -49,5 +49,7 @@ public class Program {
 				sc.nextLine(); // para o programa me aguardar digitar enter
 			}
 		}
+		UI.clearScreen();
+		UI.printMatch(chessMatch, captured);
 	}
 }
