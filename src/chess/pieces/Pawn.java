@@ -2,13 +2,18 @@ package chess.pieces;
 
 import boardgame.Board;
 import boardgame.Position;
+import chess.ChessMatch;
 import chess.ChessPiece;
 import chess.Color;
 
 public class Pawn extends ChessPiece {
 
-	public Pawn(Board board, Color color) {
+	private ChessMatch chessMatch;//declarar uma dependência para a classe ChessMatch
+	
+	
+	public Pawn(Board board, Color color, ChessMatch chessMatch) {//feita associação entre os objetos das classes
 		super(board, color);
+		this.chessMatch = chessMatch;
 	}
 
 	@Override
@@ -39,6 +44,18 @@ public class Pawn extends ChessPiece {
 			if (getBoard().positionExists(p) && isThereOpponentPiece(p)) {//se a posição existe e tem uma peça do oponente lá eu posso mover
 				mat[p.getRow()][p.getColumn()] = true;
 			}
+			
+			// # specialmove en passant white
+			if (position.getRow() == 3) {
+				Position left = new Position(position.getRow(), position.getColumn() -1);//teste abaixo: se a posição existe, se tem uma peça lá que é oponente e se essa peça que está lá é vulnerável a tomar o en passant
+				if (getBoard().positionExists(left) && isThereOpponentPiece(left) && getBoard().piece(left) == chessMatch.getEnPassantVulnerable()) {
+					mat [left.getRow() - 1][left.getColumn()] = true;
+				}
+				Position right = new Position(position.getRow(), position.getColumn() +1);//teste abaixo: se a posição existe, se tem uma peça lá que é oponente e se essa peça que está lá é vulnerável a tomar o en passant
+				if (getBoard().positionExists(right) && isThereOpponentPiece(right) && getBoard().piece(right) == chessMatch.getEnPassantVulnerable()) {
+					mat [right.getRow() - 1][right.getColumn()] = true;
+				}	
+			}			
 		}
 		else {//peças Black onde andam para baixo no jogo, porém na matriz é +
 			p.setValues(position.getRow() + 1, position.getColumn());//uma posição acima
@@ -61,6 +78,19 @@ public class Pawn extends ChessPiece {
 			if (getBoard().positionExists(p) && isThereOpponentPiece(p)) {//se a posição existe e tem uma peça do oponente lá eu posso mover
 				mat[p.getRow()][p.getColumn()] = true;
 			}
+			
+			// # specialmove en passant black
+			if (position.getRow() == 4) {
+				Position left = new Position(position.getRow(), position.getColumn() - 1);// teste abaixo: se a posição existe, se tem uma peça lá que é oponente e se essa peça que está lá é vulnerável a tomar o en passant 
+				if (getBoard().positionExists(left) && isThereOpponentPiece(left)&& getBoard().piece(left) == chessMatch.getEnPassantVulnerable()) {
+					mat[left.getRow() + 1][left.getColumn()] = true;
+				}
+				Position right = new Position(position.getRow(), position.getColumn() + 1);// teste abaixo: se a posição existe, se tem uma peça lá que é oponente e se essa peça que está lá é vulnerável a tomar o en passant
+				if (getBoard().positionExists(right) && isThereOpponentPiece(right)
+						&& getBoard().piece(right) == chessMatch.getEnPassantVulnerable()) {
+					mat[right.getRow() + 1][right.getColumn()] = true;
+				}
+			}	
 		}
 		return mat;
 	}

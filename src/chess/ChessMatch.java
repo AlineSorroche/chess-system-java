@@ -21,6 +21,8 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	private Board board;
 	private boolean check;
 	private boolean checkMate;
+	private ChessPiece enPassantVulnerable;//por padrão já começa no nulo
+	
 	
 	private List<Piece> piecesOnTheBoard = new ArrayList<>();
 	private List<Piece> capturedPieces = new ArrayList<>();
@@ -48,6 +50,10 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	
 	public boolean getCheckMate() {
 		return checkMate;
+	}
+	
+	public ChessPiece getEnPassantVulnerable() {
+		return enPassantVulnerable;
 	}
 	
 	
@@ -80,14 +86,25 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 	    	throw new ChessException("You can't put yourself in check");
 	    }
 	    
+	    ChessPiece movedPiece = (ChessPiece)board.piece(target);//pego a peça que se moveu
+	    
 	    check = (testCheck(opponent(currentPlayer))) ? true : false;
-	 
+	 	    
 	    if (testCheckMate(opponent(currentPlayer))) {//testar se a jogada que eu fiz deixou o meu oponente em xeque mate
 	    	checkMate = true;
 	    }
 	    else {
 	    	nextTurn();
 	    }	
+	    
+	    // #specialmove en passant - testar se a peça que foi movida era um peão e se moveu duas casas
+	    if (movedPiece instanceof Pawn && (target.getRow() == source.getRow() - 2 || target.getRow() == source.getRow() + 2)) {//se a peça é um peão e se ela teve um movimento de duas casas para cima e para baixo, seginifca que ...
+	    	enPassantVulnerable = movedPiece;//quer dizer que a peça está vulnerável na próxima rodada
+	    }	
+	    else {
+	    	enPassantVulnerable = null;
+	    }	    	
+	    
 	    return (ChessPiece)capturedPiece;//retorna a peça capturada, downcast para ChessPiece porque essa peça capturada era do tipo Piece
 	}
 	
@@ -120,6 +137,23 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 			board.placePiece(rook, targetT);
 			rook.increaseMoveCount();// tratar o movimento do roque grande movendo a torre manualmente
 		}
+		
+		//#specialmove en passant
+		if (p instanceof Pawn) {
+			if (source.getColumn() != target.getColumn() && capturedPiece == null) {//testo se o meu peão andou na diagonal e não capturou peça, isso significa que foi um en passant
+				Position pawnPosition;
+				if (p.getColor() == Color.WHITE) {
+					pawnPosition = new Position(target.getRow() + 1, target.getColumn());
+				}
+				else {
+					pawnPosition = new Position(target.getRow() - 1, target.getColumn());//significa que é a peça preta
+				}
+				capturedPiece = board.removePiece(pawnPosition);
+				capturedPieces.add(capturedPiece);
+				piecesOnTheBoard.remove(capturedPiece);
+			}
+		}	
+		
 		return capturedPiece;
 	}
 	
@@ -151,6 +185,21 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
 			board.placePiece(rook, sourceT);
 			rook.decreaseMoveCount();// desfaz o movimento do roque grande movendo a torre manualmente
 		}
+		
+		//#specialmove en passant
+		if (p instanceof Pawn) {
+			if (source.getColumn() != target.getColumn() && capturedPiece == enPassantVulnerable) {//testo se o meu peão andou na diagonal e não capturou peça, isso significa que foi um en passant
+				ChessPiece pawn = (ChessPiece)board.removePiece(target);//tirei a peça do lugar errado dela, pois o undeMove devolve para a posição de origem
+				Position pawnPosition;
+				if (p.getColor() == Color.WHITE) {
+					pawnPosition = new Position(3, target.getColumn());
+				}
+				else {
+					pawnPosition = new Position(4, target.getColumn());//significa que é a peça preta
+				}
+				board.placePiece(pawn, pawnPosition);				
+			}
+		}	
 	}
 	
 	private void validateSourcePosition(Position position) {
@@ -241,14 +290,14 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
         placeNewPiece('f', 1, new Bishop(board, Color.WHITE));
         placeNewPiece('g', 1, new Knight(board, Color.WHITE));
         placeNewPiece('h', 1, new Rook(board, Color.WHITE));
-        placeNewPiece('a', 2, new Pawn(board, Color.WHITE));
-        placeNewPiece('b', 2, new Pawn(board, Color.WHITE));
-        placeNewPiece('c', 2, new Pawn(board, Color.WHITE));
-        placeNewPiece('d', 2, new Pawn(board, Color.WHITE));
-        placeNewPiece('e', 2, new Pawn(board, Color.WHITE));
-        placeNewPiece('f', 2, new Pawn(board, Color.WHITE));
-        placeNewPiece('g', 2, new Pawn(board, Color.WHITE));
-        placeNewPiece('h', 2, new Pawn(board, Color.WHITE));
+        placeNewPiece('a', 2, new Pawn(board, Color.WHITE, this));
+        placeNewPiece('b', 2, new Pawn(board, Color.WHITE, this));
+        placeNewPiece('c', 2, new Pawn(board, Color.WHITE, this));
+        placeNewPiece('d', 2, new Pawn(board, Color.WHITE, this));
+        placeNewPiece('e', 2, new Pawn(board, Color.WHITE, this));
+        placeNewPiece('f', 2, new Pawn(board, Color.WHITE, this));
+        placeNewPiece('g', 2, new Pawn(board, Color.WHITE, this));
+        placeNewPiece('h', 2, new Pawn(board, Color.WHITE, this));
         
         placeNewPiece('a', 8, new Rook(board, Color.BLACK));
         placeNewPiece('b', 8, new Knight(board, Color.BLACK));
@@ -258,13 +307,13 @@ public class ChessMatch {//a classe chasMatch tem que saber a dimensão do tabule
         placeNewPiece('f', 8, new Bishop(board, Color.BLACK));
         placeNewPiece('g', 8, new Knight(board, Color.BLACK));
         placeNewPiece('h', 8, new Rook(board, Color.BLACK));
-        placeNewPiece('a', 7, new Pawn(board, Color.BLACK));
-        placeNewPiece('b', 7, new Pawn(board, Color.BLACK));
-        placeNewPiece('c', 7, new Pawn(board, Color.BLACK));
-        placeNewPiece('d', 7, new Pawn(board, Color.BLACK));
-        placeNewPiece('e', 7, new Pawn(board, Color.BLACK));
-        placeNewPiece('f', 7, new Pawn(board, Color.BLACK));
-        placeNewPiece('g', 7, new Pawn(board, Color.BLACK));
-        placeNewPiece('h', 7, new Pawn(board, Color.BLACK));      
+        placeNewPiece('a', 7, new Pawn(board, Color.BLACK, this));
+        placeNewPiece('b', 7, new Pawn(board, Color.BLACK, this));
+        placeNewPiece('c', 7, new Pawn(board, Color.BLACK, this));
+        placeNewPiece('d', 7, new Pawn(board, Color.BLACK, this));
+        placeNewPiece('e', 7, new Pawn(board, Color.BLACK, this));
+        placeNewPiece('f', 7, new Pawn(board, Color.BLACK, this));
+        placeNewPiece('g', 7, new Pawn(board, Color.BLACK, this));
+        placeNewPiece('h', 7, new Pawn(board, Color.BLACK, this));      
 	}
 }
